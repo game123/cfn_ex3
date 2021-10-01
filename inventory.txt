@@ -1,2 +1,2 @@
 [all]
-ec2-50-16-109-189.compute-1.amazonaws.com
+50.16.109.189
