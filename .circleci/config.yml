@@ -1,0 +1,41 @@
+version: 2.1
+orbs:
+  # Choose either one of the orbs below
+  # Declare a dependency on the welcome-orb
+  # welcome: circleci/welcome-orb@0.4.1
+  aws-cli: circleci/aws-cli@2.0.3
+
+jobs:
+  create_infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Ensure backen infrastructure exist
+          command: |
+            aws cloudformation deploy \
+                --template-file template.yml \
+                --stack-name my-stack
+
+  configure_infrastructure:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["ca:ea:0c:7c:ac:79:c1:30:6f:1b:92:9e:46:ed:8f:da"]
+      - run:
+          name: Install dependencies
+          command: |
+            # install the dependencies needed for the playbook
+            apk add --update ansible
+      - run:
+          name: Configure server
+          command: |
+            ansible-playbook -i inventory.txt playbook.yml
+
+workflows:
+  my_workflow:
+    jobs:
+      - configure_infrastructure
